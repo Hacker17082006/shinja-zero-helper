@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model BotEmail {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  address   String   @unique
+  password  String
+  createdAt DateTime
+  creator   Json
+
+  botAccounts BotAccount[]
+}
+
+model BotAccount {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  username   String
+  password   String
+  birthday   String
+  createdAt  DateTime
+  usageDates DateTime[]
+  creator    Json
+
+  site   Site   @relation(fields: [siteId], references: [id])
+  siteId String @db.ObjectId
+
+  email   BotEmail @relation(fields: [emailId], references: [id])
+  emailId String   @db.ObjectId
+
+  @@unique([siteId, emailId]) 
+  //compound/composite unique constraint, tạm dịch: tổ hợp ràng buộc duy nhất (?)
+  //https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#unique-1
+}
+
+model Site {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String       @unique
+  botAccounts BotAccount[]
+}
